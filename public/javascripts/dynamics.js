@@ -144,16 +144,15 @@ async function initCesiumRender() {
         }
     }));
 
-    // imageryViewModels.push(new Cesium.ProviderViewModel({
-    //     name: "Earth at Night",
-    //     iconUrl: Cesium.buildModuleUrl("Widgets/Images/ImageryProviders/blackMarble.png"),
-    //     tooltip: "The lights of cities and villages trace the outlines of civilization \
-    //              in this global view of the Earth at night as seen by NASA/NOAA's Suomi NPP satellite.",
-    //     creationFunction: function () {
-    //         return Cesium.IonImageryProvider.fromAssetId(3812);
-    //     }
-    // }));
-
+    // Earth at Night - using a different approach
+    imageryProviders.push(new Cesium.ProviderViewModel({
+        name: "Earth at Night",
+        iconUrl: Cesium.buildModuleUrl("Widgets/Images/ImageryProviders/earthAtNight.png"),
+        tooltip: "Earth at night imagery showing city lights from Cesium Ion",
+        creationFunction: function () {
+            return Cesium.IonImageryProvider.fromAssetId(3812);
+        }
+    }));
 
     // Set the default selected imagery provider (ArcGis)
     viewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[0];
@@ -218,7 +217,7 @@ async function initCesiumRender() {
 
 }
 
-async function propagateAndRenderWalkingDelta(tle, timestepInSeconds, iso8601Start, iso8601End, plotOptions = { point: true, path: true, label: true }, startAnimation = true) {
+async function propagateAndRenderWalkingDelta(tle, timestepInSeconds, iso8601Start, iso8601End, plotOptions = { point: true, path: true, label: true }) {
 
     if (tle === "") {
         alert("TLE field is empty. Cannot propagate.");
@@ -280,18 +279,6 @@ async function propagateAndRenderWalkingDelta(tle, timestepInSeconds, iso8601Sta
     }
     if (plotOptions.label) {
         addSatelliteLabel(satName, trajectory.eciSampledPositions, 10);
-    }
-
-    let initialized = false;
-
-    if (startAnimation) {
-        viewer.scene.globe.tileLoadProgressEvent.addEventListener(() => {
-            if (!initialized && viewer.scene.globe.tilesLoaded === true) {
-                viewer.clock.shouldAnimate = true;
-                initialized = true;
-                // viewer.scene.camera.zoomOut(7000000);
-            }
-        });
     }
 
     viewInICRF();
@@ -830,20 +817,11 @@ async function populateWalkerDelta() {
     }
 
     for (let satData of satelliteTLEs) {
-        await propagateAndRenderWalkingDelta(satData.tle, timestepInSeconds, iso8601Start, iso8601End, satData.plotOptions, false);
+        await propagateAndRenderWalkingDelta(satData.tle, timestepInSeconds, iso8601Start, iso8601End, satData.plotOptions);
     }
 
-    // Start animation only after all satellites have been propagated
-    let initialized = false;
-    viewer.scene.globe.tileLoadProgressEvent.addEventListener(() => {
-        if (!initialized && viewer.scene.globe.tilesLoaded === true) {
-            viewer.clock.shouldAnimate = true;
-            initialized = true;
-            viewer.scene.camera.zoomOut(7000000);
-            console.log("Walker Delta constellation propagation complete - animation started");
-        }
-    });
-
+    viewer.clock.shouldAnimate = true;
+    
 }
 
 showSunlightCheckbox.addEventListener('change', toggleSunlight);
