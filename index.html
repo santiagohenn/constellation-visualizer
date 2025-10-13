@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Constellation Plotter</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.108/Build/Cesium/Cesium.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.umd.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.108/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/datepicker.css">
+  <link rel="stylesheet" href="/stylesheets/coloris.min.css" />
+  <script type="module" src="/javascripts/dynamics.js"></script>
+  <script type="module" src="/javascripts/tle.js"></script>
+  <script type="text/javascript" src="/javascripts/coloris.min.js"></script>
+</head>
+
+<body>
+  <!-- Hamburger Menu Toggle Button -->
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <!-- Menu Overlay -->
+  <div class="menu-overlay" id="menuOverlay"></div>
+
+  <!-- Main Slide-in Menu -->
+  <nav class="slide-menu" id="slideMenu" role="navigation" aria-label="Main Navigation">
+    <!-- Menu Header -->
+    <div class="menu-header">
+      <h2 class="menu-title"></h2>
+    </div>
+    <!-- Orbital Elements Section -->
+    <section class="menu-section">
+      <h3 class="menu-section-title">Reference Elements</h3>
+      <div class="menu-input-row">
+        <div class="menu-input-group">
+          <label for="semiMajorAxis">Constellation Height (km)</label>
+          <input type="number" id="semiMajorAxis" placeholder="height [Km]" min="100" max="120000">
+        </div>
+        <div class="menu-input-group">
+          <label for="inclination">Inclination (°)</label>
+          <input type="number" id="inclination" placeholder="inc. [°]" min="0" max="180">
+        </div>
+      </div>
+    </section>
+
+    <!-- Time & Propagation Section -->
+    <section class="menu-section">
+      <h3 class="menu-section-title">Walker Delta</h3>
+      <div class="menu-input-row">
+        <div class="menu-input-group">
+          <label for="rightAscension">T</label>
+          <input type="number" id="nOfSats" placeholder="No. of Sats" min="1" max="2000">
+        </div>
+        <div class="menu-input-group">
+          <label for="argumentOfPerigee">P</label>
+          <input type="number" id="nOfPlanes" placeholder="No. of Planes" min="1" max="50">
+        </div>
+        <div class="menu-input-group">
+          <label for="anomaly">F</label>
+          <input type="number" id="phaseOffset" placeholder="Phase [°]" min="-360" max="360">
+        </div>
+      </div>
+      <div class="menu-button-row">
+        <button id="populateWalkerDelta" class="menu-button">Populate Walker-Delta</button>
+        <button id="takeSnapshot" class="menu-button">Take Snapshot!</button>
+      </div>
+      <div class="menu-note" style="margin-top: 10px; font-size: 0.9em; color: #bbb;">
+        <br>
+      </div>
+    </section>
+
+    <!-- Time & Propagation Section -->
+    <section class="menu-section">
+      <div class="menu-button-row">
+        <button id="clearButton" class="menu-button">Clear Constellation</button>
+      </div>
+    </section>
+
+
+
+    <!-- Visualization Options Section -->
+    <section class="menu-section">
+      <h3 class="menu-section-title">Display Options</h3>
+
+      <div class="checkbox-grid">
+        <label class="menu-checkbox">
+          <input type="checkbox" id="showSunlight" checked>
+          <span class="checkmark"></span>
+          <span class="checkbox-label">Show sunlight/shadow</span>
+        </label>
+        <label class="menu-checkbox">
+          <input type="checkbox" id="showLabels" checked>
+          <span class="checkmark"></span>
+          <span class="checkbox-label">Show labels</span>
+        </label>
+      </div>
+      <div class="menu-input-group">
+        <label for="color-picker">Satellite Color</label>
+        <input id="color-picker" type="text" value="#d062df91" data-coloris>
+      </div>
+
+      <div class="menu-datetime-inputs">
+        <input type="text" id="datepicker" class="datetime-input-main">
+        <input type="number" id="timestepInSeconds" class="datetime-input-step" min="1" max="600" step="1" value="30">
+      </div>
+
+      <!--
+      <div class="menu-button-row">
+        <button class="menu-button">Apply Settings</button>
+        <button class="menu-button">Reset</button>
+      </div>
+      -->
+    </section>
+  </nav>
+
+  <div class="row">
+    <div class="column right">
+      <div id="toolbar"></div>
+      <div id="cesiumContainer">
+        <!--<iframe src="/cesium"></iframe>-->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ===================================
+       MODERN SLIDE-IN MENU FUNCTIONALITY
+       =================================== */
+
+    // Menu state management
+    class SlideMenu {
+      constructor() {
+        this.menuToggle = document.getElementById('menuToggle');
+        this.menuOverlay = document.getElementById('menuOverlay');
+        this.slideMenu = document.getElementById('slideMenu');
+        this.isMenuOpen = false;
+
+        this.init();
+      }
+
+      init() {
+        // Bind event listeners
+        this.menuToggle.addEventListener('click', () => this.toggleMenu());
+        this.menuOverlay.addEventListener('click', () => this.closeMenu());
+
+        // Handle escape key
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.isMenuOpen) {
+            this.closeMenu();
+          }
+        });
+
+        // Prevent body scroll when menu is open
+        this.slideMenu.addEventListener('scroll', (e) => {
+          e.stopPropagation();
+        });
+      }
+
+      toggleMenu() {
+        if (this.isMenuOpen) {
+          this.closeMenu();
+        } else {
+          this.openMenu();
+        }
+      }
+
+      openMenu() {
+        this.isMenuOpen = true;
+        this.menuToggle.classList.add('active');
+        this.menuOverlay.classList.add('active');
+        this.slideMenu.classList.add('active');
+
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+
+        // Focus management for accessibility
+        this.slideMenu.focus();
+      }
+
+      closeMenu() {
+        this.isMenuOpen = false;
+        this.menuToggle.classList.remove('active');
+        this.menuOverlay.classList.remove('active');
+        this.slideMenu.classList.remove('active');
+
+        // Restore body scroll
+        document.body.style.overflow = '';
+      }
+    }
+
+    // Initialize menu when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const menu = new SlideMenu();
+    });
+
+  </script>
+  <script type="text/javascript">
+    Coloris({
+      theme: 'polaroid',
+      themeMode: 'dark',
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,1000 @@
+/* ===================================
+   ORBIT MAPPER - MODERN UI STYLES
+   =================================== 
+   
+   A responsive satellite tracking application with:
+   - Modern slide-in navigation menu
+   - Dark theme optimized for space visualization
+   - Mobile-first responsive design
+   - Accessibility features
+   
+   Dependencies: None (Pure CSS + Vanilla JS)
+   Browser Support: Modern browsers (ES6+)
+   =================================== */
+
+/* ===================================
+   GLOBAL STYLES & RESET
+   =================================== */
+
+body {
+  margin: 2px;
+  padding: 2px;
+  background-color: #111111;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  color: #cccccc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ===================================
+   CESIUM CONTAINER & LAYOUT
+   =================================== */
+
+#cesiumContainer {
+  width: 100%;
+  height: 96vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  position: relative;
+}
+
+.right {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.left {
+  width: 30%;
+  position: absolute;
+  z-index: 9999;
+  /* Increase z-index to be above Cesium */
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+  padding-bottom: 10px;
+}
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 1300px) {
+  .row {
+    flex-direction: column;
+  }
+
+  .column {
+    width: 100%;
+  }
+
+  .right {
+    width: 100%;
+    z-index: 0;
+  }
+
+  .left {
+    position: relative;
+    width: 100%;
+    z-index: 0;
+    margin-left: 0px;
+    margin-top: 0px;
+  }
+
+  #cesiumContainer {
+    width: 100%;
+    height: 400px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    z-index: 0;
+  }
+}
+
+.cssHeaderRow {
+  background-color: #1E1E1E;
+}
+
+.cssTableRow {
+  background-color: #2A2A2A;
+}
+
+.cssOddTableRow {
+  background-color: #2A2A2A;
+}
+
+.cssSelectedTableRow {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.cssHoverTableRow {
+  background: #444;
+}
+
+.cssHeaderCell {
+  color: #FFFFFF;
+  font-size: 16px;
+  padding: 20px !important;
+  border: solid 1px #000;
+}
+
+.cssTableCell {
+  color: #AAAAAA;
+  font-size: 16px;
+  padding: 20px !important;
+  border: solid 1px #000;
+}
+
+.cssRowNumberCell {
+  text-align: center;
+}
+
+h3 {
+  color: #aaaaaa;
+  display: inline;
+  padding: 8px;
+  font-size: 12px;
+  box-sizing: border-box;
+  margin-bottom: 1px;
+  padding-bottom: 12px;
+}
+
+input[type="text"] {
+  display: inline;
+  height: 30px;
+  padding: 8px;
+  border: 1px solid rgba(170, 170, 170, 0.3);
+  border-radius: 4px;
+  font-size: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  background-color: rgba(42, 42, 42, 0.8);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  display: inline;
+  padding: 8px;
+  border: 1px solid rgba(170, 170, 170, 0.3);
+  border-radius: 4px;
+  font-size: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: rgba(42, 42, 42, 0.8);
+}
+
+
+input[type="text3"] {
+  display: inline;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: max(0.6vw, 12px);
+  white-space: nowrap;
+  width: 16.23%;
+  margin-bottom: 0px;
+  background-color: #aaaaaa;
+}
+
+input[type="textJSON"] {
+  color: #cccccc;
+  display: inline;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 12px;
+  width: 100%;
+  height: 400px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  background-color: rgb(34, 34, 34);
+}
+
+textarea {
+  color: #8b488f;
+  display: inline;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: max(0.8vw, 11px);
+  width: 100%;
+  height: 400px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  background-color: rgb(33, 33, 33);
+  resize: none;
+}
+
+.tleInput {
+  font-size: 0.5vw;
+  height: 8vh;
+  overflow: hidden;
+}
+
+.textbox {
+  border: 2px solid #ccc;
+  padding: 10px 10px;
+  width: 100%;
+  color: #aaaaaa;
+  background-color: #111111;
+  font-family: Arial, sans-serif;
+  margin-bottom: 3px;
+}
+
+.date-container {
+  display: flex;
+  flex-wrap: nowrap;
+  padding: 2px;
+}
+
+.date-input {
+  flex: 1;
+  min-width: 0;
+  background-color: #aaaaaa;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.date-input:first-child {
+  flex: 2;
+}
+
+label {
+  color: #aaaaaa;
+  border-radius: 0px;
+  padding: 2px 3px;
+  margin-bottom: 10px;
+}
+
+.input-container {
+  padding-bottom: 0px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.input-container.elements {
+  padding-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.input-container input {
+  font-size: 12px;
+  flex: 1;
+  min-width: calc(16.222% - 10px);
+  /* Adjust the width and gap */
+  margin-right: 10px;
+  /* Adjust the gap between inputs */
+}
+
+.input-container .input-prefix {
+  overflow: hidden;
+  white-space: nowrap;
+  margin-right: 2px;
+  color: white;
+  text-align: center;
+  padding: 5px;
+  width: 15%;
+}
+
+/* Remove the margin from the last input to prevent right spacing */
+.input-container input:last-child {
+  margin-right: 0;
+}
+
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 0px;
+}
+
+.button-container button {
+  flex: 1;
+  min-width: calc(20% - 10px);
+  /* Adjust the width and gap */
+  height: 36px;
+  margin-right: 10px;
+  /* Adjust the gap between buttons */
+  padding: 6px 12px;
+  background-color: #372356;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Remove the margin from the last button to prevent right spacing */
+.button-container button:last-child {
+  margin-right: 0;
+}
+
+.button-generic {
+  flex: 1;
+  min-width: calc(20% - 10px);
+  /* Adjust the width and gap */
+  height: 36px;
+  /* Adjust the gap between buttons */
+  padding: 6px 12px;
+  background-color: #372356;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #674f8a;
+}
+
+.iframe-container {
+  width: 100%;
+}
+
+.iframe-container iframe {
+  width: 100%;
+  height: 600px;
+}
+
+/*Tabs style*/
+
+.group::after,
+.tabBlock-tabs::after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+p,
+ol,
+ul {
+  margin-bottom: 1.25rem;
+  margin-top: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  margin-left: 0.1rem;
+}
+
+.unstyledList,
+.tabBlock-tabs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tabBlock {
+  margin: 15px 0;
+  background: transparent;
+}
+
+/* Ensure proper clearfix for tab layout */
+.tabBlock::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.tabBlock-tab {
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  background: rgba(55, 35, 86, 0.8);
+  border: 1px solid rgba(170, 170, 170, 0.2);
+  border-radius: 8px 8px 0 0;
+  color: #cccccc;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 12px 20px;
+  position: relative;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  margin-right: 2px;
+  vertical-align: top;
+}
+
+.tabBlock-tab:hover {
+  background: rgba(103, 79, 138, 0.9);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(103, 79, 138, 0.3);
+}
+
+.tabBlock-tab:last-of-type {
+  margin-right: 0;
+}
+
+/* Removed old tab pseudo-elements for cleaner modern design */
+
+@media screen and (min-width: 700px) {
+  .tabBlock-tab {
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+}
+
+/* ===================================
+   RESPONSIVE ENHANCEMENTS & OVERRIDES
+   =================================== */
+
+/* TLE Input specific styling */
+.tleInput {
+  font-family: 'Courier New', monospace;
+  line-height: 1.4;
+  white-space: pre;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 1600px) {
+  .tleInput {
+    font-size: 0.55vw !important;
+  }
+}
+
+/* Ensure menu works well on all screen sizes */
+@media (max-width: 480px) {
+  .slide-menu {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .menu-toggle {
+    top: 15px;
+    left: 15px;
+    width: 40px;
+    height: 40px;
+  }
+  
+  .menu-input-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .menu-button-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* High-resolution displays */
+@media (min-width: 1920px) {
+  .slide-menu {
+    max-width: 600px;
+  }
+}
+
+/* ===================================
+   IMPLEMENTATION NOTES
+   =================================== 
+   
+   MENU SYSTEM ARCHITECTURE:
+   
+   1. Hamburger Button (.menu-toggle)
+      - Fixed position, always visible
+      - Transforms to X when menu is open
+      - Accessible with ARIA labels
+   
+   2. Overlay (.menu-overlay)
+      - Covers entire screen when menu is open
+      - Provides backdrop blur effect
+      - Clicking closes the menu
+   
+   3. Slide Menu (.slide-menu)
+      - Slides in from left with smooth animation
+      - Uses CSS transforms for performance
+      - Sections are organized semantically
+   
+   RESPONSIVE BEHAVIOR:
+   - Mobile: Full-width slide-in menu
+   - Tablet: 90% width, max 450px
+   - Desktop: Max 500px width
+   - Ultra-wide: Max 600px width
+   
+   ACCESSIBILITY FEATURES:
+   - Proper ARIA labels and roles
+   - Keyboard navigation (ESC to close)
+   - Focus management
+   - High contrast ratios
+   
+   PERFORMANCE OPTIMIZATIONS:
+   - CSS transforms for animations (GPU accelerated)
+   - Backdrop-filter for modern blur effects
+   - Minimal reflows and repaints
+   - Optimized for 60fps animations
+   
+   =================================== */
+
+.tabBlock-tab.is-active {
+  background: rgba(103, 79, 138, 1);
+  color: #ffffff;
+  border-color: rgba(103, 79, 138, 0.8);
+  z-index: 1;
+  box-shadow: 0 4px 12px rgba(103, 79, 138, 0.4);
+  border-bottom: 1px solid rgba(103, 79, 138, 1);
+}
+
+.tabBlock-content {
+  font-family: 'Courier New', monospace;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(24, 24, 24, 0.95), rgba(34, 34, 34, 0.95));
+  border: 1px solid rgba(170, 170, 170, 0.1);
+  border-radius: 8px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: visible;
+  scroll-behavior: smooth;
+}
+
+/* Textarea styling within tab content */
+.tabBlock-content textarea {
+  background: rgba(42, 42, 42, 0.8);
+  border: 1px solid rgba(170, 170, 170, 0.3);
+  border-radius: 6px;
+  color: #ffffff;
+  font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 5px;
+  transition: all 0.2s ease;
+  width: 100%;
+  min-height: 300px;
+  resize: vertical;
+}
+
+.tabBlock-content textarea:focus {
+  outline: none;
+  border-color: #674f8a;
+  background: rgba(42, 42, 42, 1);
+  box-shadow: 0 0 0 2px rgba(103, 79, 138, 0.2);
+}
+
+.tabBlock-pane > :last-child {
+  margin-bottom: 0;
+}
+
+/* ===================================
+   MODERN SLIDE-IN MENU SYSTEM
+   =================================== */
+
+/* Hamburger Menu Button */
+.menu-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 10001;
+  background: rgba(55, 35, 86, 0.9);
+  border: none;
+  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.menu-toggle:hover {
+  background: rgba(103, 79, 138, 0.9);
+  transform: scale(1.05);
+}
+
+/* Hamburger Icon Lines */
+.menu-toggle span {
+  width: 24px;
+  height: 2px;
+  background: white;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+/* Animated hamburger to X transformation */
+.menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Menu Overlay */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(1px);
+}
+
+.menu-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Slide-in Menu Container */
+.slide-menu {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 90%;
+  max-width: 400px;
+  height: 100vh;
+  background: linear-gradient(135deg, rgba(24, 24, 24, 0.95), rgba(34, 34, 34, 0.95));
+  z-index: 9999;
+  transition: left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(170, 170, 170, 0.1);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+}
+
+.slide-menu.active {
+  left: 0;
+}
+
+/* Menu Header */
+.menu-header {
+  padding: 60px 20px 20px;
+  border-bottom: 1px solid rgba(170, 170, 170, 0.1);
+  background: rgba(55, 35, 86, 0.1);
+}
+
+.menu-title {
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  text-align: left;
+}
+
+.menu-subtitle {
+  color: #aaaaaa;
+  font-size: 0.8rem;
+  margin: 2px 0 0 0;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  text-align: left;
+}
+
+/* Menu Content Areas */
+.menu-section {
+  padding: 5px 20px;
+  border-bottom: 1px solid rgba(170, 170, 170, 0.05);
+}
+
+.menu-section:last-child {
+  border-bottom: none;
+}
+
+.menu-section-title {
+  color: #cccccc;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 12px 0;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  text-align: left;
+  padding-left: 0;
+}
+
+/* Add extra space for Display Options section */
+.menu-section:has(.menu-checkbox) .menu-section-title,
+.menu-section .menu-section-title:contains("Display Options") {
+  margin-bottom: 16px;
+}
+
+/* Special spacing for Display Options section - more targeted approach */
+.menu-section:nth-child(5) .menu-section-title {
+  margin-bottom: 22px;
+}
+
+/* Form Elements in Menu */
+.menu-input-group {
+  margin-bottom: 12px;
+}
+
+.menu-input-group label {
+  display: block;
+  color: #aaaaaa;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  text-align: left;
+}
+
+.menu-input-group input,
+.menu-input-group textarea {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid rgba(170, 170, 170, 0.3);
+  border-radius: 6px;
+  background: rgba(42, 42, 42, 0.8);
+  color: #ffffff;
+  font-size: 13px;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.menu-input-group input:focus,
+.menu-input-group textarea:focus {
+  outline: none;
+  border-color: #674f8a;
+  background: rgba(42, 42, 42, 1);
+  box-shadow: 0 0 0 2px rgba(103, 79, 138, 0.2);
+}
+
+.menu-input-group textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+/* TLE Input specific styling - monospace font for better data readability */
+.menu-input-group textarea.tleInput {
+  font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  padding: 10px;
+}
+
+/* Grid layouts for inputs */
+.menu-input-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+/* Buttons in Menu */
+.menu-button {
+  width: 100%;
+  padding: 10px 14px;
+  background: #372356;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  margin-bottom: 6px;
+}
+
+.menu-button:hover {
+  background: #674f8a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(103, 79, 138, 0.3);
+}
+
+.menu-button:active {
+  transform: translateY(0);
+}
+
+.menu-button-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+/* Custom Checkboxes for Menu */
+.menu-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  cursor: pointer;
+  user-select: none;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+}
+
+/* Two-column layout for checkboxes */
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.checkbox-grid .menu-checkbox {
+  margin-bottom: 0;
+}
+
+.menu-checkbox input[type="checkbox"] {
+  display: none;
+}
+
+.menu-checkbox .checkmark {
+  width: 20px;
+  height: 20px;
+  background: rgba(42, 42, 42, 0.8);
+  border: 2px solid rgba(170, 170, 170, 0.3);
+  border-radius: 4px;
+  margin-right: 12px;
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.menu-checkbox:hover .checkmark {
+  border-color: #674f8a;
+  background: rgba(42, 42, 42, 1);
+}
+
+.menu-checkbox input[type="checkbox"]:checked + .checkmark {
+  background: #372356;
+  border-color: #674f8a;
+}
+
+.menu-checkbox input[type="checkbox"]:checked + .checkmark::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 4px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.menu-checkbox .checkbox-label {
+  color: #cccccc;
+  font-size: 13px;
+  line-height: 1.3;
+  text-align: left;
+}
+
+/* Date and Time Inputs - Separate Label and Input Rows */
+.menu-datetime-labels {
+  display: grid;
+  grid-template-columns: 1fr 80px;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.menu-datetime-inputs {
+  display: grid;
+  grid-template-columns: 1fr 80px;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* Label styling for datetime section */
+.datetime-label-main,
+.datetime-label-step {
+  color: #aaaaaa;
+  font-size: 0.8rem;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+}
+
+/* Input styling for datetime section */
+.datetime-input-main,
+.datetime-input-step {
+  width: 100%;
+  height: 30px;
+  padding: 5px;
+  border: 1px solid rgba(170, 170, 170, 0.3);
+  border-radius: 6px;
+  background: rgba(42, 42, 42, 0.8);
+  color: #ffffff;
+  font-size: 13px;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.datetime-input-main:focus,
+.datetime-input-step:focus {
+  outline: none;
+  border-color: #674f8a;
+  background: rgba(42, 42, 42, 1);
+  box-shadow: 0 0 0 2px rgba(103, 79, 138, 0.2);
+}
+
+/* Responsive: stack on mobile */
+@media (max-width: 480px) {
+  .menu-datetime-labels,
+  .menu-datetime-inputs {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .slide-menu {
+    max-width: 450px;
+  }
+  
+  .menu-toggle {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .menu-toggle span {
+    width: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* On desktop, menu can be larger */
+  .slide-menu {
+    max-width: 500px;
+  }
+}
+
+/* Smooth scrolling for menu */
+.slide-menu {
+  scroll-behavior: smooth;
+}
+
+.slide-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.slide-menu::-webkit-scrollbar-track {
+  background: rgba(24, 24, 24, 0.3);
+}
+
+.slide-menu::-webkit-scrollbar-thumb {
+  background: rgba(103, 79, 138, 0.5);
+  border-radius: 3px;
+}
+
+.slide-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(103, 79, 138, 0.7);
+}
