@@ -78,15 +78,18 @@ async function initCesiumRender() {
             console.warn('Falling back to offline mode');
         });
 
+    // Set ArcGIS access token if available (optional - works without token too)
+    // Cesium.ArcGisMapService.defaultAccessToken = "<Your ArcGIS Access Token>";
+
     // Optimized for offline usage:
     viewer = new Cesium.Viewer("cesiumContainer", {
         baseLayer: Cesium.ImageryLayer.fromProviderAsync(
-            Cesium.TileMapServiceImageryProvider.fromUrl(
-                Cesium.buildModuleUrl("Assets/Textures/NaturalEarthII")
+            Cesium.ArcGisMapServerImageryProvider.fromBasemapType(
+                Cesium.ArcGisBaseMapType.SATELLITE
             )
         ),
         orderIndependentTranslucency: false,
-        baseLayerPicker: true,
+        baseLayerPicker: true, // Keep the picker but we'll customize it
         geocoder: false,
         homeButton: true,
         infoBox: false,
@@ -96,6 +99,64 @@ async function initCesiumRender() {
         infoBox: false,
         scene3DOnly: true,
     });
+
+    // Customize the base layer picker by removing unwanted imagery providers
+    const imageryProviders = viewer.baseLayerPicker.viewModel.imageryProviderViewModels;
+
+    // Clear all default providers
+    imageryProviders.removeAll();
+
+    // Add only the imagery providers you want
+
+    // ESRI World Imagery (using modern ArcGIS API)
+    imageryProviders.push(new Cesium.ProviderViewModel({
+        name: 'ArcGIS Satellite',
+        iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/ArcGisMapServiceWorldImagery.png'),
+        tooltip: 'ArcGIS World Imagery (Satellite)',
+        creationFunction: function () {
+            return Cesium.ArcGisMapServerImageryProvider.fromBasemapType(
+                Cesium.ArcGisBaseMapType.SATELLITE
+            );
+        }
+    }));
+
+    // Natural Earth II (offline, good default)
+    imageryProviders.push(new Cesium.ProviderViewModel({
+        name: 'Natural Earth II',
+        iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/naturalEarthII.png'),
+        tooltip: 'Natural Earth II imagery (offline)',
+        creationFunction: function () {
+            return Cesium.TileMapServiceImageryProvider.fromUrl(
+                Cesium.buildModuleUrl("Assets/Textures/NaturalEarthII")
+            );
+        }
+    }));
+
+    // OpenStreetMap (free alternative)
+    imageryProviders.push(new Cesium.ProviderViewModel({
+        name: 'OpenStreetMap',
+        iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
+        tooltip: 'OpenStreetMap imagery',
+        creationFunction: function () {
+            return new Cesium.OpenStreetMapImageryProvider({
+                url: 'https://a.tile.openstreetmap.org/'
+            });
+        }
+    }));
+
+    // imageryViewModels.push(new Cesium.ProviderViewModel({
+    //     name: "Earth at Night",
+    //     iconUrl: Cesium.buildModuleUrl("Widgets/Images/ImageryProviders/blackMarble.png"),
+    //     tooltip: "The lights of cities and villages trace the outlines of civilization \
+    //              in this global view of the Earth at night as seen by NASA/NOAA's Suomi NPP satellite.",
+    //     creationFunction: function () {
+    //         return Cesium.IonImageryProvider.fromAssetId(3812);
+    //     }
+    // }));
+
+
+    // Set the default selected imagery provider (ArcGis)
+    viewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[0];
 
     const scene = viewer.scene;
     const controller = scene.screenSpaceCameraController;
@@ -109,8 +170,8 @@ async function initCesiumRender() {
     controller._minimumRotateRate = 0.01; // default 0.02
 
     // Zoom controls
-    controller.zoomFactor = 0.01;         // default 5.0; smaller = smoother zoom steps
-    controller.wheelZoomFactor = 0.000001;   // control on mouse wheel. It doesn't work.
+    controller.zoomFactor = 1;         // default 5.0; smaller = smoother zoom steps
+    controller.wheelZoomFactor = 0.0005;   // control on mouse wheel. It doesn't work.
 
     // Translation (panning)
     controller.translateFactor = 1.0;    // leave close to default for stability
@@ -509,7 +570,7 @@ function changeEntitiesColors() {
     }
     const color = getSelectedColor();
     satelliteStack.forEach(satName => {
-        if (satName.endsWith("0")) { 
+        if (satName.endsWith("0")) {
             viewer.entities.getById(satName + "_path").polyline.material = color;
         }
         viewer.entities.getById(satName + "_point").point.color = new Cesium.Color(color.red, color.green, color.blue, 1.0);
@@ -693,12 +754,14 @@ async function populateWalkerDelta() {
 
     let orbitalPeriodMinutes = getOrbitalPeriodMinutes(semiMajorAxis);
 
+
     // Calculate phasing within each plane (satellites evenly spaced)
     let phasing = 360 / satsPerPlane;
 
-    // Calculate Walker Delta phase offset: delta_phi = f × 360 / t
-    // This is the phase difference between equivalent satellites in adjacent planes
-    let walkerPhaseOffset = (phaseOffset * 360) / nOfSats;
+    // Calculate Walker Delta phase offset: Δθ = F × 360° / T
+    // Note: User inputs F as degrees directly, so we use it directly as the phase offset
+    // rather than multiplying by 360/T (which would be for unitless F factor)
+    let walkerPhaseOffset = phaseOffset; // Direct degree input
 
     // Set consistent time window for entire constellation
     const today = new Date();
