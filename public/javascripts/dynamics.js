@@ -1,22 +1,15 @@
-let group, staticObjects, camera, renderer, pointsMaterial;
-
 const cesiumContainer = document.getElementById('cesiumContainer');
 const clearButton = document.getElementById('clearButton');
 const colorTextArea = document.getElementById('color-picker');
-
 const showSunlightCheckbox = document.getElementById('showSunlight');
 const showLabelsCheckbox = document.getElementById('showLabels');
-
 const takeSnapshotButton = document.getElementById('takeSnapshot');
 const populateWalkerDeltaButton = document.getElementById('populateWalkerDelta');
 
 let satelliteStack = [];
-let satellitePaths = [];
-let satelliteIcons = [];
-let satelliteLabels = [];
 
 import { buildLine1, buildLine2 } from './tle.js';
-import { randomName, addSecondsToIso8601, getOrbitalPeriodMinutes } from './propagatorUtils.js';
+import { randomName, getOrbitalPeriodMinutes } from './propagatorUtils.js';
 
 const picker = new easepick.create({
     element: "#datepicker",
@@ -41,8 +34,7 @@ const picker = new easepick.create({
     }
 });
 
-let viewer, scene, time;
-let timestepInSeconds, iso8601Start, iso8601End;
+let viewer, timestepInSeconds, iso8601Start, iso8601End;
 let icrfEnabled = true; // Track ICRF state
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -118,7 +110,7 @@ async function initCesiumRender() {
 
     // Zoom controls
     controller.zoomFactor = 0.01;         // default 5.0; smaller = smoother zoom steps
-    controller.wheelZoomFactor = 0.000001;   // much finer control on mouse wheel (was 0.00005)
+    controller.wheelZoomFactor = 0.000001;   // control on mouse wheel. It doesn't work.
 
     // Translation (panning)
     controller.translateFactor = 1.0;    // leave close to default for stability
@@ -223,11 +215,9 @@ async function propagateAndRenderWalkingDelta(tle, timestepInSeconds, iso8601Sta
         addSatellitePoint(satName, trajectory.eciSampledPositions, getSelectedColor());
     }
     if (plotOptions.path) {
-        satellitePaths.push(satName + "_path");
         addSatellitePath(satName, trajectory.eciPositions, getSelectedColor(), 1);
     }
     if (plotOptions.label) {
-        satelliteLabels.push(satName + "_label");
         addSatelliteLabel(satName, trajectory.eciSampledPositions, 10);
     }
 
@@ -242,91 +232,6 @@ async function propagateAndRenderWalkingDelta(tle, timestepInSeconds, iso8601Sta
             }
         });
     }
-
-    viewInICRF();
-}
-
-async function propagateAndRender(tle, timestepInSeconds, iso8601Start, iso8601End) {
-
-    if (tle === "") {
-        alert("TLE field is empty. Cannot propagate.");
-        return;
-    }
-
-    if (timestepInSeconds === null || timestepInSeconds === undefined || isNaN(timestepInSeconds)) {
-        console.log("Timestep is not defined. Using default value of 30 seconds.");
-        timestepInSeconds = 30;
-    } else if (timestepInSeconds < 1) {
-        console.log("Timestep cannot be less than 1 second. Defaulting to 1 second.");
-        timestepInSeconds = 1;
-    }
-
-    let tleArray = tle.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    let start = Cesium.JulianDate.fromIso8601(iso8601Start);
-    let stop = Cesium.JulianDate.fromIso8601(iso8601End);
-    let totalSeconds = Cesium.JulianDate.secondsDifference(stop, start);
-
-    totalSeconds = Math.min(totalSeconds, 604800);
-    if (totalSeconds === 604800) {
-        console.log("Warning: Defaulting to 1 week");
-    }
-    if (totalSeconds <= 0) {
-        console.log("Timespan must be greater than zero: " + totalSeconds);
-        return;
-    }
-
-    let satName, tle1, tle2;
-
-    if (tleArray.length == 2) {
-        tle1 = tleArray[0];
-        tle2 = tleArray[1];
-        satName = tle1.substring(2, 5);
-    } else if (tleArray.length == 3) {
-        satName = tleArray[0];
-        tle1 = tleArray[1];
-        tle2 = tleArray[2];
-    } else {
-        tleArray = randomizeSatellite().split('\n');
-        tle1 = tleArray[1];
-        tle2 = tleArray[2];
-        satName = tleArray[0];
-        // TODO use the satellite's orbital period
-        totalSeconds = 120 * 60;
-        console.log("TLE invalid.");
-    }
-
-    updateViewerClock(start, totalSeconds);
-
-    console.log("Propagating " + satName + "\n" + tle1 + "\n" + tle2 + "\n" + " from " + iso8601Start + " to " + iso8601End + " (" + totalSeconds + " seconds) with timestep " + timestepInSeconds + " seconds.");
-    let trajectory = await propagateSGP4(tle1, tle2, start, totalSeconds, timestepInSeconds);
-
-    outputCoordinatesToGUI(trajectory.eciPositions, trajectory.ecefPositions);
-
-    // TODO: Fix present satellite test
-    if (viewer.entities.getById(satName) !== undefined) {
-        console.log("The scenario already contains this satellite");
-        return;
-    }
-
-    satelliteStack.push(satName);
-    satellitePaths.push(satName + "_path");
-    satelliteIcons.push(satName + "_icon");
-    satelliteLabels.push(satName + "_label");
-
-    addSatelliteIcon(satName, trajectory.eciSampledPositions);
-    addSatelliteLabel(satName, trajectory.eciSampledPositions);
-    addSatellitePath(satName, trajectory.eciPositions, getSelectedColor());
-    addSatellitePoint(satName, trajectory.eciSampledPositions, getSelectedColor());
-
-    let initialized = false;
-
-    viewer.scene.globe.tileLoadProgressEvent.addEventListener(() => {
-        if (!initialized && viewer.scene.globe.tilesLoaded === true) {
-            viewer.clock.shouldAnimate = true;
-            initialized = true;
-            viewer.scene.camera.zoomOut(7000000);
-        }
-    });
 
     viewInICRF();
 }
@@ -625,7 +530,6 @@ function takeSnapshot() {
     // https://stackoverflow.com/questions/45778720/window-open-opens-a-blank-screen-in-chrome
     const win = window.open();
     win.document.write(`<img src="${viewer.canvas.toDataURL("image/png")}" />`);
-    // stop the browser from trying to load "nothing" forever
     win.stop();
 
     // reset viewer size
@@ -792,7 +696,7 @@ async function populateWalkerDelta() {
     // Calculate phasing within each plane (satellites evenly spaced)
     let phasing = 360 / satsPerPlane;
 
-    // Calculate Walker Delta phase offset: Δθ = f × 360 / t
+    // Calculate Walker Delta phase offset: delta_phi = f × 360 / t
     // This is the phase difference between equivalent satellites in adjacent planes
     let walkerPhaseOffset = (phaseOffset * 360) / nOfSats;
 

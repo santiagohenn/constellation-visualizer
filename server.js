@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-// Load environment variables from both files
+
 require('dotenv').config({ path: './KEYS.env' });
 require('dotenv').config({ path: './.env' });
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -35,13 +35,10 @@ module.exports = {
     }
 };
 
-// Get Cesium API key from either environment variable name
+// Get Cesium API key from either environment variable name. Not needed for offline use.
 const cesiumApiKey = process.env.CESIUM_ION_ACCESS_TOKEN || process.env.CESIUM_API_KEY;
 
-// Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Serve the index.html file
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -53,7 +50,6 @@ app.get('/get-cesium-config', (req, res) => {
   res.json(cesiumConfig);
 });
 
-// Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
